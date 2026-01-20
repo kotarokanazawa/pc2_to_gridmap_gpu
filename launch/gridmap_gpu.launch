@@ -1,0 +1,30 @@
+<!-- pc2_to_gridmap_gpu.launch -->
+<launch>
+
+  <!-- arguments -->
+  <arg name="input_topic" default="/points_raw/dist/outlier/self/transformed"/>
+  <arg name="map_frame"   default="remote_robot/base_link"/>
+  <arg name="resolution"  default="0.05"/>
+  <arg name="length_x"    default="3.0"/>
+  <arg name="length_y"    default="3.0"/>
+  <arg name="origin_x"    default="-1.5"/>
+  <arg name="origin_y"    default="-1.5"/>
+
+  <!-- node -->
+  <node
+    pkg="pc2_to_gridmap_gpu"
+    type="pc2_to_gridmap_gpu_node"
+    name="pc2_to_gridmap_gpu"
+    output="screen">
+
+    <param name="input_topic" value="$(arg input_topic)"/>
+    <param name="map_frame"   value="$(arg map_frame)"/>
+    <param name="resolution"  value="$(arg resolution)"/>
+    <param name="length_x"    value="$(arg length_x)"/>
+    <param name="length_y"    value="$(arg length_y)"/>
+    <param name="origin_x"    value="$(arg origin_x)"/>
+    <param name="origin_y"    value="$(arg origin_y)"/>
+
+  </node>
+
+</launch>
