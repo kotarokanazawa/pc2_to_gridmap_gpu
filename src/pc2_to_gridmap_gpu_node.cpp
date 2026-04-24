@@ -214,21 +214,26 @@ private:
                                       origin_y_ + length_y_ * 0.5));
     gm.add("elevation", NAN);
 
-    auto& layer = gm["elevation"];
-
-    // Convert ordered int -> float, and write to grid_map
-    // IMPORTANT: layer(ix,iy) (x_index, y_index)
+    // Convert ordered int -> float, and write to grid_map by metric position.
+    // grid_map's matrix indices are not the same convention as the CUDA
+    // lower-left ix/iy grid, so avoid direct matrix indexing here.
     const float ninf = -std::numeric_limits<float>::infinity();
     for (int iy = 0; iy < height_; ++iy) {
-    for (int ix = 0; ix < width_; ++ix) {
+      for (int ix = 0; ix < width_; ++ix) {
         const int zi = h_grid_out_zi_[iy * width_ + ix];
         const float zmax = orderedIntToFloat_host(zi);
+        if (!std::isfinite(zmax) || zmax == ninf) {
+          continue;
+        }
 
-        const int ix_gm = (width_  - 1) - ix;
-        const int iy_gm = (height_ - 1) - iy;
-
-        layer(ix_gm, iy_gm) = std::isfinite(zmax) && (zmax != ninf) ? zmax : NAN;
-    }
+        const double x = origin_x_ + (static_cast<double>(ix) + 0.5) * resolution_;
+        const double y = origin_y_ + (static_cast<double>(iy) + 0.5) * resolution_;
+        const grid_map::Position position(x, y);
+        grid_map::Index index;
+        if (gm.getIndex(position, index)) {
+          gm.at("elevation", index) = zmax;
+        }
+      }
     }
 
     grid_map_msgs::GridMap out;

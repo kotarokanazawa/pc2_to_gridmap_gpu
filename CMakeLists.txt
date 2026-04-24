@@ -23,6 +23,7 @@ message(STATUS "pc2_to_gridmap_gpu CUDA C++ host compiler: ${CUDA_GXX8}")
 catkin_package()
 
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${CUDA_INCLUDE_DIRS}
 )
@@ -32,6 +33,7 @@ include_directories(
 cuda_add_library(gpu_gridmap_cuda
   src/gpu_gridmap.cu
   src/gridmap_to_pc2_gpu_compact.cu
+  src/pc2_gridmap_smooth_cuda.cu
 )
 
 add_executable(pc2_to_gridmap_gpu_node
@@ -60,5 +62,19 @@ target_link_libraries(gridmap_to_pc2_gpu_node
 )
 
 add_dependencies(gridmap_to_pc2_gpu_node
+  ${catkin_EXPORTED_TARGETS}
+)
+
+add_executable(pc2_gridmap_smooth_node
+  src/pc2_gridmap_smooth_node.cpp
+)
+
+target_link_libraries(pc2_gridmap_smooth_node
+  gpu_gridmap_cuda
+  ${catkin_LIBRARIES}
+  ${CUDA_LIBRARIES}
+)
+
+add_dependencies(pc2_gridmap_smooth_node
   ${catkin_EXPORTED_TARGETS}
 )

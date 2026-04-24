@@ -123,11 +123,22 @@ private:
 
     const std::string layer = "elevation";
     map.add(layer, std::numeric_limits<float>::quiet_NaN());
-    auto& E = map[layer];
+    // CUDA grid uses lower-left origin with x/y cell indices. grid_map's
+    // matrix storage has its own index convention, so write by metric position.
+    for (int iy = 0; iy < height_; ++iy) {
+      for (int ix = 0; ix < width_; ++ix) {
+        const float z = elev[iy * width_ + ix];
+        if (!std::isfinite(z)) {
+          continue;
+        }
 
-    for (int r = 0; r < height_; ++r) {
-      for (int c = 0; c < width_; ++c) {
-        E(r, c) = elev[r * width_ + c];
+        const double x = origin_x_ + (static_cast<double>(ix) + 0.5) * resolution_;
+        const double y = origin_y_ + (static_cast<double>(iy) + 0.5) * resolution_;
+        const grid_map::Position position(x, y);
+        grid_map::Index index;
+        if (map.getIndex(position, index)) {
+          map.at(layer, index) = z;
+        }
       }
     }
 

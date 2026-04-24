@@ -197,7 +197,7 @@ bool CudaPipeline::process(const float* h_x, const float* h_y, const float* h_z,
   }
 
   // empty sentinel (ordered(-inf))
-  const int32_t empty_oi = floatToOrderedIntHost(-CUDART_INF_F);
+  const int32_t empty_oi = floatToOrderedIntHost(-std::numeric_limits<float>::infinity());
 
   // init ordered-int grid
   {
